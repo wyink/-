@@ -172,9 +172,10 @@ sub old_taxid_printer {
 	my $output = 'old_taxidList.txt' ;
 	open my $OFH,">",${output} or die "Can't open ${output}\n" ;
 	my $taxid = '' ;
+	my $delimiter = $self->{delimiter_of_accession_and_taxid} ;
 	foreach my $accessionID (keys %{$old_taxid_hash_ref}){
 		$taxid = $old_taxid_hash_ref->{${accessionID}};
-		print $OFH "${accessionID}\t${taxid}\n";
+		print $OFH ${accessionID}.${delimiter}.${taxid}."\n";
 	}
 	close $OFH;
 
