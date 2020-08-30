@@ -3,14 +3,14 @@ use warnings;
 use Taxonomy;
 use BimUtils;
 
-### 1. 作業ディレクトリへのパス
-my $dir = "F:/GENE/rbcL/rbcL_Taxonomy_Tree/resources";
+### 1. node.dmpおよびnames.dmpを配置したディレクトリへのパス
+my $dir = "./data/";
 
 ### 2. 必要なファイルをセットしてTaxonomyオブジェクトを生成
 my $taxobj = Taxonomy->new(
-		accession_taxid_file => "${dir}/10_Viridiplantae_taxid.txt",
-		delimiter_of_accession_and_taxid => "\t",
-		nodes_dmp_file => "${dir}/nodes.dmp",
+		accession_taxid_file => "inputA.txt",	  #AccessionID	TaxonomyIDが記述されたファイル
+		delimiter_of_accession_and_taxid => "\t", #inputA.txtで使用しているデリミタ
+		nodes_dmp_file => "${dir}/nodes.dmp",	  
 		names_dmp_file => "${dir}/names.dmp" 
 	);
 
@@ -18,7 +18,7 @@ my $taxobj = Taxonomy->new(
 ### 3. AccessionIDに対応するTaxonの全階層を出力
 $taxobj->hierarchy_printer(
 		'output_taxID.txt', 	#全階層をtaxidで出力するファイル名
-		'true',		   			#taxidを学名に変換して出力する場合true,しない場合はfalse
+		'true',		   	#taxidを学名に変換して出力する場合true,しない場合はfalse
 		'output_sciname.txt'  	#trueを選択した場合の出力ファイル名
 	); 
 
@@ -43,8 +43,8 @@ $taxobj->hierarchy_printer(
 
 ### 5.taxidを更新
 $taxobj->update_taxid_accession_file(
-		'2_renewed_taxid_new.txt',		#上記の通りにあなたが上書きしたファイル名
-		'updated_acc_taxid.txt' #更新されたAccessionIDと対応するtaxidのテキストファイル名
+		'2_renewed_taxid_new.txt',	#上記の通りにあなたが上書きしたファイル名
+		'updated_acc_taxid.txt' 	#更新されたAccessionIDと対応するtaxidのテキストファイル名
 	);
 
 ### 6. 手順3を再び行う.
@@ -54,7 +54,7 @@ $taxobj->update_taxid_accession_file(
 
 $taxobj->hierarchy_printer(
 		'output_taxID.txt', 	#全階層をtaxidで出力するファイル名
-		'true',		   			#taxidを学名に変換して出力する場合true,しない場合false
+		'true',		   	#taxidを学名に変換して出力する場合true,しない場合false
 		'output_sciname.txt'  	#trueを選択した場合の出力ファイル名
 	); 
 
