@@ -57,7 +57,7 @@ sub accession_taxid_file_getter {
 }
 
 sub toScie_name {
-	my $self 		   = shift;
+	my $self 	   = shift;
 	my $original_file  = shift;
 	my $ndp_delr 	   = shift;
 	my $ndp_del        = shift;
@@ -159,13 +159,13 @@ sub old_taxid_printer {
 	Taxonomyオブジェクト生成時に入力したファイルにはAccessionIDと
 	対応するtaxidが登録されているが、taxidはNCBIによって更新される
 	ことがある.そのため、names.dmpやnode.dmpに入力時のtaxidが登録
-	されていないといったことが生じうる。ここではそのようなtaxidの組合せ
-	を出力する。
+	されていないといったことが生じうる。ここではそのようなtaxidの組
+	合せを出力する。
 
 	Parameters
 	----------
 	$old_taxid_hash_ref:キーはAccessionID，値は対応するtaxidである.
-						ただし、taxidが更新されているキーのみである.
+			    ただし、taxidが更新されているキーのみである.
 
 =cut
 
@@ -182,24 +182,23 @@ sub old_taxid_printer {
 
 sub hierarchy_printer {
 	my $self = shift ;
-	my $out_file1_name 		= shift // 'outA.txt' ;
+	my $out_file1_name 	= shift // 'outA.txt' ;
 	my $isScientific_output = shift //  'false' 	;
-	my $out_file2_name 		= shift // 'outB.txt'	;
+	my $out_file2_name 	= shift // 'outB.txt'	;
 
 =pod
 	Description
 	-----------
 	AFI19405.1	80325|species	4015|genus	4014|family	41937|order	91836|no rank...
-	AccessionID 最下層のtaxid|対応するタクソン　...　最上層のtaxid|対応するタクソン
-	を出力する.
+	AccessionID 最下層のtaxid|対応するタクソンから最上層のtaxid|対応するタクソンを出力する.
 
 	Parameters
 	-----------
 	$out_file1_name : Descriptionで述べた内容を出力する.
 
-	$isScientific_output : デフォルトではtaxIDと対応するタクソンの組み合わせ
-						   で出力するがこのtaxIDを学名に変換して出力するかどうか.
-						   trueで出力、falseで出力しない.
+	$isScientific_output :  デフォルトではtaxIDと対応するタクソンの組み合わせ
+				で出力するがこのtaxIDを学名に変換して出力するかどうか.
+				trueで出力、falseで出力しない.
 	
 	$out_file3_name : $isScieitific_outputが真の際に出力するファイル名
 
@@ -267,8 +266,8 @@ sub hierarchy_printer {
 }
 
 sub update_taxid_accession_file {
-	my $self = shift;
-	my $new_taxid_file = shift; 
+	my $self 			  = shift;
+	my $new_taxid_file 		  = shift; 
 	my $new_accession_taxid_file_path = shift; 
 
 =pod
