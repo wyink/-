@@ -27,23 +27,23 @@ my $text2 = <<'EOS';
  Set the path to the node.dmp/names.dmp. : 
 EOS
 
+    #最後の改行は取り除く
+    foreach($text1,$text2){chomp($_);}
+
     print $text1;
     my $flag = 'false';
-    my $dir  = '';
     do{
     	my $ansA = <STDIN>; #y or n;
     	chomp($ansA);
+
     	if($ansA eq 'y'){
     		$flag = 'true';
-            print $text2;
-    		$dir = <STDIN>;
-            chomp $dir;
-    		print "\n";
 
     	}elsif($ansA eq 'n'){
     		$flag = 'true';
     		#taxdmp.zipをダウンロード/解凍して
     		#node.dmp/names.dmpを./data直下に保存する.
+	        print " downloading now...\n" ;
     		DownloadUtils::download();
     
     	}else{
@@ -51,6 +51,12 @@ EOS
     	}
 
     }while($flag eq 'false');
+
+    #set the path to the node.dmp/names.dmp
+    print $text2;
+    my $dir = <STDIN>;
+    chomp $dir;
+    print "\n";
 
     return $dir;
 
@@ -99,6 +105,7 @@ my $text2 = <<'EOS';
 
  Select the number : 
 EOS
+    foreach($text1,$text2){chomp($_);}
 
     print $text1;
     my $inputfile = <STDIN>;
@@ -106,7 +113,7 @@ EOS
     print $text2;
 
     my $delimiter = '';
-    $flag = 'false';
+    my $flag = 'false';
 
     do{
     	my $d = <STDIN>; #1~3
@@ -125,7 +132,7 @@ EOS
     	}
     }while($flag eq 'false');
 
-    return $inputfile　,$delimiter ;
+    return $inputfile,$delimiter ;
 
 }
 

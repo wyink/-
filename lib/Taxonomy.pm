@@ -126,7 +126,7 @@ sub node_dmp_parser {
 =pod
 	Description
 	-----------
-	node.dmpファイルをパース
+	nodes.dmpファイルをパース
 
 	Returns
 	------
@@ -158,7 +158,7 @@ sub old_taxid_printer {
 	-----------
 	Taxonomyオブジェクト生成時に入力したファイルにはAccessionIDと
 	対応するtaxidが登録されているが、taxidはNCBIによって更新される
-	ことがある.そのため、names.dmpやnode.dmpに入力時のtaxidが登録
+	ことがある.そのため、names.dmpやnodes.dmpに入力時のtaxidが登録
 	されていないといったことが生じうる。ここではそのようなtaxidの組
 	合せを出力する。
 
