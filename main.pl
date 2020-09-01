@@ -1,17 +1,20 @@
 use strict;
 use warnings;
+
+use lib './lib';
+
+use Input;
 use Taxonomy;
 use BimUtils;
 use DownloadUtils;
-use Input;
 
 
 ### 1. node.dmpおよびnames.dmpを配置したディレクトリへのパスをセット
-#	   localにない場合はNCBIからダウンロード
-my $dir = input::set_data();
+#	   ローカルPCに保存されていない場合はNCBIからダウンロードする.
+my $dir = Input::set_data();
 
 ### 2. AccessionID	TaxonomyIDが記述されたファイルをセットしてTaxonomyオブジェクトを生成
-my ($inputfile,$delimiter) = input::input_file();
+my ($inputfile,$delimiter) = Input::input_file();
 
 my $taxobj = Taxonomy->new(
 		accession_taxid_file => $inputfile,		# AccessionID/TaxonomyIDを記述したファイル
@@ -21,7 +24,8 @@ my $taxobj = Taxonomy->new(
 	);
 
 #実行中
-print "running...\n" ;
+print " running...\n" ;
+
 
 ### 3. AccessionIDに対応するTaxonの全階層を出力
 $taxobj->hierarchy_printer(
@@ -42,7 +46,7 @@ $taxobj->hierarchy_printer(
 ### 4. accession_taxid_fileにカラムを追加して新しいtaxidを追加する
 # 	   example. //AccessionID	old_taxID	new_taxID
 # 	   -----------------------------
-# 	   AAA00001.1	112233	223344 
+# 	   AAA00001.1	112233	223344
 # 	   AAB00001.1	112234	221166
 # 	   ...
 # 	   -----------------------------
