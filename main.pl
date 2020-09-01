@@ -14,10 +14,10 @@ my $dir = input::set_data();
 my ($inputfile,$delimiter) = input::input_file();
 
 my $taxobj = Taxonomy->new(
-		accession_taxid_file => $inputfile,				# AccessionID/TaxonomyIDを記述したファイル
+		accession_taxid_file => $inputfile,		# AccessionID/TaxonomyIDを記述したファイル
 		delimiter_of_accession_and_taxid => $delimiter,	# $inputfileで使用しているデリミタ
-		nodes_dmp_file => "${dir}/nodes.dmp",			# nodes.dmpのパス	  
-		names_dmp_file => "${dir}/names.dmp" 			# names.dmpのパス
+		nodes_dmp_file => "${dir}/nodes.dmp",		# nodes.dmpのパス	  
+		names_dmp_file => "${dir}/names.dmp" 		# names.dmpのパス
 	);
 
 #実行中
