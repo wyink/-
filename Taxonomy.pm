@@ -137,7 +137,7 @@ sub node_dmp_parser {
 	my %hash=();#%hash =(Parent_taxid=>"Parent_taxid|Child_taxid|Taxon(genus,sfamily...)");
 	my $nodes_file_del = '\t\|\t';
 	my ($prID,$chID,$taxon)=('','',''); # 1,1,no rank
-	my ($ndp_delr,$ndp_del)=('\|',"|"); 
+	my ($ndp_delr,$ndp_del)=('\|',"|");
 	open my $FH,"<",$self->{nodes_dmp_file} or die "Can't open nodes.dmp file\n";
 	while(my $line=<$FH>){
 		chomp $line;
