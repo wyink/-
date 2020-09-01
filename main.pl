@@ -2,18 +2,26 @@ use strict;
 use warnings;
 use Taxonomy;
 use BimUtils;
+use DownloadUtils;
+use Input;
 
-### 1. node.dmpおよびnames.dmpを配置したディレクトリへのパス
-my $dir = "./data/";
 
-### 2. 必要なファイルをセットしてTaxonomyオブジェクトを生成
+### 1. node.dmpおよびnames.dmpを配置したディレクトリへのパスをセット
+#	   localにない場合はNCBIからダウンロード
+my $dir = input::set_data();
+
+### 2. AccessionID	TaxonomyIDが記述されたファイルをセットしてTaxonomyオブジェクトを生成
+my ($inputfile,$delimiter) = input::input_file();
+
 my $taxobj = Taxonomy->new(
-		accession_taxid_file => "inputA.txt",	  #AccessionID	TaxonomyIDが記述されたファイル
-		delimiter_of_accession_and_taxid => "\t", #inputA.txtで使用しているデリミタ
-		nodes_dmp_file => "${dir}/nodes.dmp",	  
-		names_dmp_file => "${dir}/names.dmp" 
+		accession_taxid_file => $inputfile,				# AccessionID/TaxonomyIDを記述したファイル
+		delimiter_of_accession_and_taxid => $delimiter,	# $inputfileで使用しているデリミタ
+		nodes_dmp_file => "${dir}/nodes.dmp",			# nodes.dmpのパス	  
+		names_dmp_file => "${dir}/names.dmp" 			# names.dmpのパス
 	);
 
+#実行中
+print "running...\n" ;
 
 ### 3. AccessionIDに対応するTaxonの全階層を出力
 $taxobj->hierarchy_printer(
