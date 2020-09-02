@@ -24,7 +24,7 @@ EOS
 my $text2 = <<'EOS';
 
  =======================================
- Set the path to the node.dmp/names.dmp. : 
+ Set the directory path to the node.dmp/names.dmp. : 
 EOS
 
     #最後の改行は取り除く
@@ -53,10 +53,29 @@ EOS
     }while($flag eq 'false');
 
     #set the path to the node.dmp/names.dmp
-    print $text2;
-    my $dir = <STDIN>;
-    chomp $dir;
-    print "\n";
+
+    my $flag2 = 'false';
+    my $dir='';
+    while($flag2 eq 'false'){
+        print $text2;
+        $dir = <STDIN>;
+        chomp $dir;
+        print "\n";
+
+        if ($dir=~/.+\/$/ || $dir=~/.+\\$/){
+            $dir =~s/^(.+).{1}$/$1/;
+        }
+
+        if(-f "${dir}/nodes.dmp" && -f "${dir}/names.dmp"){
+            $flag2 = 'true';
+            print " OK.\n\n";
+        }else{
+            print "\n";
+            print " Error\n";
+            print " Verify that the correct directory path are given.\n" ;
+            print "\n";
+        }
+    }
 
     return $dir;
 
@@ -90,7 +109,7 @@ my $text1 = <<'EOS';
    ...
    --------------------
 
- your file :  
+ Input your filename :  
 EOS
 
 my $text2 = <<'EOS';
@@ -107,15 +126,28 @@ my $text2 = <<'EOS';
 EOS
     foreach($text1,$text2){chomp($_);}
 
-    print $text1;
-    my $inputfile = <STDIN>;
-    chomp $inputfile;
-    print $text2;
+    my $inputfile='';
+    my $flag='false';
+    while($flag eq 'false'){
+        print $text1;
+        $inputfile = <STDIN>;
+        chomp $inputfile;
+        if(-f $inputfile){
+            $flag='true';
+            print "\n" ;
+            print " OK.\n\n";
+        }else{
+            print "\n";
+            print " Error\n";
+            print " Verify that correct path to the file are given.\n";
+        }
+    }
 
     my $delimiter = '';
-    my $flag = 'false';
+    $flag = 'false'; 
 
     do{
+        print $text2;
     	my $d = <STDIN>; #1~3
     	if($d == 1){
     		$flag = 'true';
@@ -139,6 +171,7 @@ EOS
 sub taxid_outfile {
 
 =pod
+
     Description
     ------------
     全階層をtaxidで出力した結果を出力するファイル名
@@ -149,12 +182,18 @@ sub taxid_outfile {
 
 =cut
 
-$text1 =<<'EOS';
+my $text1 =<<'EOS';
+
+
  Enter the output filename :  
 EOS
+
+    chomp($text1) ;
+    print $text1;
+    my $taxid_outfile = <STDIN>;
     my $flag = 'false';
+
     do{
-    	my $taxid_outfile = <STDIN>; 
     	chomp($taxid_outfile);
     	if($taxid_outfile eq ''){
             #re-loop
@@ -165,6 +204,7 @@ EOS
     }while($flag eq 'false');
 
     return $taxid_outfile;
+
 }
 
 sub isToSciname {
@@ -180,33 +220,38 @@ sub isToSciname {
 
 =cut
 
-$text1 =<<'EOS';
+my $text1 =<<'EOS';
+ ==================================================================
 
  Do you also want to convert TaxonomyID to Scientific name? [y/n] :  
 EOS
 
     chomp($text1);
-    print $text1;
 
     my $flag = 'false'; #to confirm the input-value
     my $bool = 'false';
 
     do{
+        print $text1 ;
     	my $in = <STDIN>; 
     	chomp($in);
 
     	if($in eq 'y'){
             $flag = 'true';
             $bool = 'true';
-    	}else if($in eq 'n'){
+    	}elsif($in eq 'n'){
             $flag = 'true';
             $bool = 'false';
         }else{
-            #re-input;
+            #loop
     	}
 
     }while($flag eq 'false');
 
+    print "\n";
+    print " running..." ;
     return $bool;
 }
+
+
 1;

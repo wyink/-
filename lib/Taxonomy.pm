@@ -244,19 +244,32 @@ sub hierarchy_printer {
 	close $OFH;
 
 	#更新されていないtaxidが存在する場合はリストで出力する.
+	my $return_code = 'false';
 	if(scalar(keys %old_taxid_hash)){
 		&old_taxid_printer(
 				$self,
 				\%old_taxid_hash #(AccessionID=>taxid)
 			) ;
+		$return_code = 'true';
 	}
+
+
 
 	#taxidを学名に変換したファイルを出力する(オプションを選択した場合)
 	if($isScientific_output eq 'true'){
 		#$out_file2_name : $isScieitific_outputが真の際に出力するファイル名
+		print "\n" ;
+		print "\n" ; 
 		print " Enter the output filename : " ;
+
 		my $out_file2_name 	= <STDIN>;
+
 		chomp($out_file2_name);
+		
+		print "\n";
+		print " input OK.\n" ;
+		print "\n";
+		print " converting...";
 
 		&toScie_name(
 				$self,
@@ -267,6 +280,7 @@ sub hierarchy_printer {
 				$out_file2_name   #taxid/タクソンを学名/タクソンに変換して出力するファイルパス
 			);
 	}
+	return $return_code;
 }
 
 sub update_taxid_accession_file {
