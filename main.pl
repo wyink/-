@@ -9,6 +9,7 @@ use BimUtils;
 use DownloadUtils;
 
 
+
 ### 1. node.dmpおよびnames.dmpを配置したディレクトリへのパスをセット
 #	   ローカルPCに保存されていない場合はNCBIからダウンロードする.
 my $dir = Input::set_data();
