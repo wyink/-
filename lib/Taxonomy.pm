@@ -185,7 +185,6 @@ sub hierarchy_printer {
 	my $self = shift ;
 	my $out_file1_name 	= shift // 'outA.txt' ;
 	my $isScientific_output = shift //  'false' 	;
-	my $out_file2_name 	= shift // 'outB.txt'	;
 
 =pod
 	Description
@@ -201,7 +200,6 @@ sub hierarchy_printer {
 				で出力するがこのtaxIDを学名に変換して出力するかどうか.
 				trueで出力、falseで出力しない.
 	
-	$out_file3_name : $isScieitific_outputが真の際に出力するファイル名
 
 =cut
 
@@ -255,6 +253,11 @@ sub hierarchy_printer {
 
 	#taxidを学名に変換したファイルを出力する(オプションを選択した場合)
 	if($isScientific_output eq 'true'){
+		#$out_file2_name : $isScieitific_outputが真の際に出力するファイル名
+		print " Enter the output filename : " ;
+		my $out_file2_name 	= <STDIN>;
+		chomp($out_file2_name);
+
 		&toScie_name(
 				$self,
 				$out_file1_name,  #変換前のファイル（タクソンに対応するのがtaxid）のパス

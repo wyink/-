@@ -26,13 +26,19 @@ my $taxobj = Taxonomy->new(
 #実行中
 print " running...\n" ;
 
+#全階層をtaxidで出力するファイル名
+my $taxid_outfile = Input::taxid_outfile;
+
+#taxidを学名に変換して出力する場合true,しない場合はfalse
+my $isToSciname = Input::isToSciname();
+
 
 ### 3. AccessionIDに対応するTaxonの全階層を出力
 $taxobj->hierarchy_printer(
-		'output_taxID.txt', 	#全階層をtaxidで出力するファイル名
-		'true',		   	#taxidを学名に変換して出力する場合true,しない場合はfalse
-		'output_sciname.txt'  	#trueを選択した場合の出力ファイル名
+		$outfile_taxid,	
+		$isToSciname	
 	); 
+
 
 #old_taxID.txtがディレクトリに出力されていない場合は成功
 #出力されている場合は以下を参照してください.

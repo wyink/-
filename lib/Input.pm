@@ -136,4 +136,77 @@ EOS
 
 }
 
+sub taxid_outfile {
+
+=pod
+    Description
+    ------------
+    全階層をtaxidで出力した結果を出力するファイル名
+
+    Return
+    ------
+    $taxid_outfile : 全階層をtaxidで出力した結果を出力するファイル名
+
+=cut
+
+$text1 =<<'EOS';
+ Enter the output filename :  
+EOS
+    my $flag = 'false';
+    do{
+    	my $taxid_outfile = <STDIN>; 
+    	chomp($taxid_outfile);
+    	if($taxid_outfile eq ''){
+            #re-loop
+    	}else{
+    		$flag = 'true' ;
+    	}
+
+    }while($flag eq 'false');
+
+    return $taxid_outfile;
+}
+
+sub isToSciname {
+    
+=pod
+    Description
+    ------------
+    taxidを学名に変換して出力するかどうかを判断する.
+
+    Return
+    ------
+    $bool : taxidを学名に変換して出力する場合true,しない場合はfalse
+
+=cut
+
+$text1 =<<'EOS';
+
+ Do you also want to convert TaxonomyID to Scientific name? [y/n] :  
+EOS
+
+    chomp($text1);
+    print $text1;
+
+    my $flag = 'false'; #to confirm the input-value
+    my $bool = 'false';
+
+    do{
+    	my $in = <STDIN>; 
+    	chomp($in);
+
+    	if($in eq 'y'){
+            $flag = 'true';
+            $bool = 'true';
+    	}else if($in eq 'n'){
+            $flag = 'true';
+            $bool = 'false';
+        }else{
+            #re-input;
+    	}
+
+    }while($flag eq 'false');
+
+    return $bool;
+}
 1;
