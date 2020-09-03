@@ -12,6 +12,10 @@ sub new {
 	$self->{nodes_dmp_file} //='none';
 	$self->{names_dmp_file} //='none';
 
+	my %old_taxid_hash = ();
+	$self->{old_taxid_hash} = \%old_taxid_hash;
+
+	$self->init();
 	#指定の引数が入力されたかどうかの確認
 	foreach $_ (keys %$self){
 		if ($self->{$_} eq 'none'){
@@ -20,6 +24,14 @@ sub new {
 		}
 	}
 	return bless $self,$class;
+}
+
+sub init {
+	my $self = '';
+	my $self->{ac_tx_hash} = BimUtils->hash_key_del_val(
+			$self->{accession_taxid_file},
+			$self->{delimiter_of_accession_and_taxid}
+		);
 }
 
 sub accession_taxid_file_setter {
@@ -50,7 +62,7 @@ sub accession_taxid_file_getter {
 	Returns
 	-------
 	$self->accession_taxid_file:
-	メンバ変数の$accession_taxid_fileの値を返却｜る
+	メンバ変数の$accession_taxid_fileの値を返却する
 	
 =cut
 	return $self->{accession_taxid_file};
@@ -149,42 +161,11 @@ sub node_dmp_parser {
 	return ($ndp_delr,$ndp_del,\%hash);
 }
 
-sub old_taxid_printer {
-	my $self = shift;
-	my $old_taxid_hash_ref = shift;
-
-=pod
-	Description
-	-----------
-	Taxonomyオブジェクト生成時に入力したファイルにはAccessionIDと
-	対応するtaxidが登録されているが、taxidはNCBIによって更新される
-	ことがある.そのため、names.dmpやnodes.dmpに入力時のtaxidが登録
-	されていないといったことが生じうる。ここではそのようなtaxidの組
-	合せを出力する。
-
-	Parameters
-	----------
-	$old_taxid_hash_ref:キーはAccessionID，値は対応するtaxidである.
-			    ただし、taxidが更新されているキーのみである.
-
-=cut
-
-	my $output = 'old_taxidList.txt' ;
-	open my $OFH,">",${output} or die "Can't open ${output}\n" ;
-	my $taxid = '' ;
-	my $delimiter = $self->{delimiter_of_accession_and_taxid} ;
-	foreach my $accessionID (keys %{$old_taxid_hash_ref}){
-		$taxid = $old_taxid_hash_ref->{${accessionID}};
-		print $OFH ${accessionID}.${delimiter}.${taxid}."\n";
-	}
-	close $OFH;
-
-}
-
 sub hierarchy_printer {
 	my $self = shift ;
 	my $out_file1_name 	= shift // 'outA.txt' ;
 	my $isScientific_output = shift //  'false' 	;
+	my $acc_tax_ref = shift // 'false' ;#update時に使用
 
 =pod
 	Description
@@ -203,14 +184,16 @@ sub hierarchy_printer {
 
 =cut
 
-	my %old_taxid_hash=() ;# taxidが更新されていないAcccessionIDを管理.			　
+	#my $old_taxid_hash_ref = $self->{old_taxid_hash} ;# taxidが更新されていないAcccessionIDを管理.			　
 
 	#$acc_tax_ref = {"accessionID"=>"taxID"}を作成する
-	my $acc_tax_ref= BimUtils
-			->hash_key_del_val(
-					$self->{accession_taxid_file},
-					$self->{delimiter_of_accession_and_taxid}
-				);
+	if($acc_tax_ref eq 'false'){
+		$acc_tax_ref= BimUtils
+				->hash_key_del_val(
+						$self->{accession_taxid_file},
+						$self->{delimiter_of_accession_and_taxid}
+					);
+	}
 
 	#nodes.dmpの解析
 	my ($ndp_delr,$ndp_del,$node_parsed_href) = &node_dmp_parser($self);
@@ -229,7 +212,7 @@ sub hierarchy_printer {
 				($prID,$chID,$taxon)=split/${ndp_delr}/,$node_parsed_href->{$taxID};
 				push @outList,join($ndp_del,($prID,$taxon)) ;#"$prID|$taxon"
 			}else{
-				$old_taxid_hash{$accessionID} = $taxID;
+				$self->{old_taxid_hash}->{$accessionID} = $taxID;
 				last;
 			}
 			$taxID = $chID;
@@ -245,24 +228,26 @@ sub hierarchy_printer {
 
 	#更新されていないtaxidが存在する場合はリストで出力する.
 	my $return_code = 'false';
-	if(scalar(keys %old_taxid_hash)){
-		&old_taxid_printer(
+	my $temp = $self->{old_taxid_hash};
+	if(scalar(keys %$temp)){
+		update_taxid_accession_file(
 				$self,
-				\%old_taxid_hash #(AccessionID=>taxid)
-			) ;
+				$acc_tax_ref
+			);
 		$return_code = 'true';
 	}
 
 
 
 	#taxidを学名に変換したファイルを出力する(オプションを選択した場合)
+	my $out_file2_name = '';
 	if($isScientific_output eq 'true'){
 		#$out_file2_name : $isScieitific_outputが真の際に出力するファイル名
 		print "\n" ;
 		print "\n" ; 
 		print " Enter the output filename : " ;
 
-		my $out_file2_name 	= <STDIN>;
+		$out_file2_name 	= <STDIN>;
 
 		chomp($out_file2_name);
 		
@@ -280,13 +265,12 @@ sub hierarchy_printer {
 				$out_file2_name   #taxid/タクソンを学名/タクソンに変換して出力するファイルパス
 			);
 	}
-	return $return_code;
+	return ($return_code,$acc_tax_ref,$out_file2_name);
 }
 
 sub update_taxid_accession_file {
-	my $self 			  = shift;
-	my $new_taxid_file 		  = shift; 
-	my $new_accession_taxid_file_path = shift; 
+	my $self	= shift;
+	my $acc_tax_ref =	shift;
 
 =pod
 	Description
@@ -296,14 +280,7 @@ sub update_taxid_accession_file {
 
 	Parameters
 	----------
-	$new_taxid_file : AccessionID,古いtaxid,新しいtaxidを一行に
-				　   まとめた新しいファイルのパスをセットする.
-					 fmt. AccessionID/oldTaxid/newTaxid #/...delimiter
-				
-	$new_accession_taxid_file_path :
-					 更新後のaccession_taxid_fileのファイル名（パス）
-					 fmt. AccessionID/newTaxid #/...delimiter
-	
+	$acc_tax_ref : hash_ref = {'AccessionID'=>'taxonomyID'}
 
 =cut
 
@@ -311,6 +288,7 @@ sub update_taxid_accession_file {
 	#更新前・更新後は同じデリミタを使用する.
 	my $delimiter = $self->{delimiter_of_accession_and_taxid}; 
 
+=pod
 	#AcccessionIDと変更後のtaxIDを連想配列で紐づけ
 	open my $FH,"<",$new_taxid_file or die "Can't open the ${new_taxid_file}\n";
 	my %acc_new = () ; #$hash{AccessionID} = newTaxiD
@@ -321,15 +299,37 @@ sub update_taxid_accession_file {
 		$acc_new{$accessionID} = $newTaxid;
 	}
 	close $FH;
+=cut
 
-	#AccessionIDと変更前のtaxIDを連想配列で紐づけ
+=pod
+	#AccessionIDと変更前のtaxIDを連想配列で紐づける際、
 	my $acc_tax_ref= BimUtils
 		->hash_key_del_val(
 				$self->{accession_taxid_file},
 				$self->{delimiter_of_accession_and_taxid}
 			);
 	my %acc_old = %{$acc_tax_ref}; #(AccessionID=>before_updated_taxID);
+=cut
 
+	#merged.dmpより，更新taxidリストを作成
+	#update = (old_taxid->new_taxid);
+	my $update = BimUtils->hash_key_del_val("./data/merged.dmp",'\s\|\s');
+	
+	#更新前taxIDのハッシュのリファレンス($self->{old_taxid_hash})
+	#を$updateを利用して更新する.
+	my ($old_taxid,$new_taxid) = ('','') ;
+	foreach my $accid(keys %{$$self{old_taxid_hash_ref}}){
+		$old_taxid = $self->{old_taxid_hash}->{$accid};
+		$new_taxid = $update->{$old_taxid};
+
+		#update %acc_tax
+		$acc_tax_ref->{$accid} = $new_taxid;
+	}
+
+	hierarchy_printer()
+	return $acc_tax_ref;
+
+=pod	
 	#更新後のAccessionID・taxidを出力する
 	open my $OFH,">",${new_accession_taxid_file_path} or 
 						die "Can't create new_accession_taxid_file\n";
@@ -341,9 +341,10 @@ sub update_taxid_accession_file {
 		}
 	}
 	close $OFH;
+=cut
 
 	#メンバ変数(accession_taxid_file)を更新する
-	&accession_taxid_file_setter($self,${new_accession_taxid_file_path});
+	#&accession_taxid_file_setter($self,${new_accession_taxid_file_path});
 
 }
 

@@ -253,5 +253,31 @@ EOS
     return $bool;
 }
 
+sub ask_update {
+
+my $text1 =<<'EOS';
+
+ Your input file includes old taxonomyID.
+ Do you want to update them and output again?[y/n] : 
+EOS
+
+    my $flag='false';
+    while($flag eq 'false'){
+        print $text1;
+        my $answer = <STDIN>;
+        chomp $answer;
+
+        if($answer eq 'y'){
+            $flag='true';
+            return 'true';
+        }elsif($answer eq 'n'){
+            $flag='true';
+            return 'false';
+        }else{
+            #loop
+        }
+    }
+
+}
 
 1;

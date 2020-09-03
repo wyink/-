@@ -41,34 +41,29 @@ my $isToSciname = Input::isToSciname();
 
 
 ### 3. AccessionIDに対応するTaxonの全階層を出力
-my $return_code = $taxobj->hierarchy_printer(
+my ($return_code,$acc_tax_ref) = $taxobj->hierarchy_printer(
 		$taxid_outfile,	
 		$isToSciname	
 	); 
 
+
 #返却値がtrueの場合は更新前のtaxidが含まれている
 if ($return_code eq 'true'){
-
-my $out =<<'EOS';
-
- You should update TaxonomyID manually.
- See the old_taxid.txt file for these unupdaed TaxonomyID. 
-
- please update the contents of the textfile as follows.
- =====================================================================
- example.before    				example.after                        
- AccessionI  taxID				AccessionID	taxID	taxID(updated)
- ---------------------  		----------------------------------    
- AAA00001.1   112233 	 -->	AAA00001.1	112233	223344       
- AAB00001.1   112234			AAB00001.1	112234	221166    
- ...         					...                              
- ---------------------			---------------------------------- 
- 
- if you update the file, please run the 'update.batch'.
-EOS
-
-	print $out;
-
+	
+	#taxidを更新するかどうかの判断
+	my $bool = Input::ask_update();
+	if($bool eq 'true'){
+		DownloadUtils::download_merged();
+		my $ud_atr = $taxobj->update_taxid_accession_file(
+				$acc_tax_ref,
+				$taxid_outfile,
+				$isToSciname
+			);
+	}elsif($bool eq 'false'){
+		# Do nothing.
+	}else{
+		print " Fatal error\n";
+	}
 }
 
 #Finished!
