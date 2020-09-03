@@ -32,8 +32,9 @@ EOS
 
     print $text1;
     my $flag = 'false';
+    my $ansA = '';
     do{
-    	my $ansA = <STDIN>; #y or n;
+    	$ansA = <STDIN>; #y or n;
     	chomp($ansA);
 
     	if($ansA eq 'y'){
@@ -53,27 +54,31 @@ EOS
     }while($flag eq 'false');
 
     #set the path to the node.dmp/names.dmp
-
-    my $flag2 = 'false';
+    #&set_data()でセットした場合は./data直下
     my $dir='';
-    while($flag2 eq 'false'){
-        print $text2;
-        $dir = <STDIN>;
-        chomp $dir;
-        print "\n";
-
-        if ($dir=~/.+\/$/ || $dir=~/.+\\$/){
-            $dir =~s/^(.+).{1}$/$1/;
-        }
-
-        if(-f "${dir}/nodes.dmp" && -f "${dir}/names.dmp"){
-            $flag2 = 'true';
-            print " OK.\n\n";
-        }else{
+    if($ansA eq 'n'){
+        $dir = './data';
+    }else{
+        my $flag2 = 'false';
+        while($flag2 eq 'false'){
+            print $text2;
+            $dir = <STDIN>;
+            chomp $dir;
             print "\n";
-            print " Error\n";
-            print " Verify that the correct directory path are given.\n" ;
-            print "\n";
+
+            if ($dir=~/.+\/$/ || $dir=~/.+\\$/){
+                $dir =~s/^(.+).{1}$/$1/;
+            }
+
+            if(-f "${dir}/nodes.dmp" && -f "${dir}/names.dmp"){
+                $flag2 = 'true';
+                print " OK.\n\n";
+            }else{
+                print "\n";
+                print " Error\n";
+                print " Verify that the correct directory path are given.\n" ;
+                print "\n";
+            }
         }
     }
 
@@ -231,7 +236,7 @@ EOS
     my $flag = 'false'; #to confirm the input-value
     my $bool = 'false';
 
-    do{
+    while($flag eq 'false'){
         print $text1 ;
     	my $in = <STDIN>; 
     	chomp($in);
@@ -245,11 +250,14 @@ EOS
         }else{
             #loop
     	}
+    }
 
-    }while($flag eq 'false');
-
+    #flush
+    $|=1;
     print "\n";
     print " running..." ;
+    $|=0;
+    
     return $bool;
 }
 
@@ -258,7 +266,7 @@ sub ask_update {
 my $text1 =<<'EOS';
 
  Your input file includes old taxonomyID.
- Do you want to update them and output again?[y/n] : 
+ Do you want to update them and run again?[y/n] : 
 EOS
 
     my $flag='false';

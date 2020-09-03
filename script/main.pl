@@ -41,7 +41,7 @@ my $isToSciname = Input::isToSciname();
 
 
 ### 3. AccessionIDに対応するTaxonの全階層を出力
-my ($return_code,$acc_tax_ref) = $taxobj->hierarchy_printer(
+my $return_code = $taxobj->hierarchy_printer(
 		$taxid_outfile,	
 		$isToSciname	
 	); 
@@ -53,14 +53,21 @@ if ($return_code eq 'true'){
 	#taxidを更新するかどうかの判断
 	my $bool = Input::ask_update();
 	if($bool eq 'true'){
+		#merged.dmpをダウンロード
 		DownloadUtils::download_merged();
-		my $ud_atr = $taxobj->update_taxid_accession_file(
-				$acc_tax_ref,
-				$taxid_outfile,
-				$isToSciname
-			);
+
+		#入力ファイルのtaxIDを更新
+		$taxobj->update_taxid_accession_file();
+
+		#再出力
+		$taxobj->hierarchy_printer(
+			$taxid_outfile,
+			$isToSciname
+		);
+		
 	}elsif($bool eq 'false'){
 		# Do nothing.
+		# Safely finished!
 	}else{
 		print " Fatal error\n";
 	}

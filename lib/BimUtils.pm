@@ -4,7 +4,7 @@ use strict;
 use warnings;
 
 sub hash_key_del_val {
-    my ($self,$infile,$delimiter) = @_ ;
+    my ($self,$infile,$delimiter,$func) = @_ ;
 
 =pod 
     Description
@@ -28,10 +28,13 @@ sub hash_key_del_val {
     }
 
 =cut
+
+    #&func = \$func;
     my %hash = () ;
     open my $FH,"<",$infile or die "Can't open ${infile}\n";
     while(my $line=<$FH>){
         chomp $line;
+        #&func;
         my ($key,$value) = split/${delimiter}/,$line;
         $hash{$key} = $value ;
     }

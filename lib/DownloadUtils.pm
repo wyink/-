@@ -31,6 +31,10 @@ sub download_merged {
 		mkdir $todir;
 	}
 	
+	if(-f "${todir}/merged.dmp"){
+		return;
+	}
+
 	if(-f "${todir}/taxdmp.zip"){
 		#Do not download from NCBI .
 	}else{

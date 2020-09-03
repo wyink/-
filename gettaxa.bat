@@ -1,5 +1,5 @@
 @echo off
-perl src/main.pl
+perl script/main.pl
 pause
 
 
