@@ -288,4 +288,50 @@ EOS
 
 }
 
+
+sub taxon_outfile {
+=pod
+    Description
+    -----------
+    taxonomyID|学名をtaxon|学名に変換する関数
+
+    Returns
+    -------
+    $out_file_name : Descriptionで示した内容を出力するファイル名.
+
+=cut
+
+my $text1 =<<'EOS';
+
+ Enter the output filename : 
+EOS
+
+
+my $text2 =<<'EOS';
+
+ input OK.
+
+EOS
+
+    foreach($text1,$text2){chomp($_);}
+
+	my $flag='false';
+    my $out_file_name = '' ;
+    while($flag eq 'false'){
+
+        print $text1;
+	    $out_file_name 	= <STDIN>;
+	    chomp($out_file_name);
+
+        if($out_file_name ne ''){
+            $flag='true';
+            print $text2;
+        }else{
+            #loop
+        }
+    }
+    return $out_file_name;
+}
+
+
 1;

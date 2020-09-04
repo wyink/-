@@ -39,13 +39,11 @@ my $taxid_outfile = Input::taxid_outfile();
 #taxidを学名に変換して出力する場合true,しない場合はfalse
 my $isToSciname = Input::isToSciname();
 
-
+my $return_code = '';
 ### 3. AccessionIDに対応するTaxonの全階層を出力
-my $return_code = $taxobj->hierarchy_printer(
-		$taxid_outfile,	
-		$isToSciname	
-	); 
-
+$return_code = $taxobj->hierarchy_printer(
+		$taxid_outfile
+	);
 
 #返却値がtrueの場合は更新前のtaxidが含まれている
 if ($return_code eq 'true'){
@@ -61,8 +59,7 @@ if ($return_code eq 'true'){
 
 		#再出力
 		$taxobj->hierarchy_printer(
-			$taxid_outfile,
-			$isToSciname
+			$taxid_outfile
 		);
 		
 	}elsif($bool eq 'false'){
@@ -72,6 +69,16 @@ if ($return_code eq 'true'){
 		print " Fatal error\n";
 	}
 }
+
+#taxidを学名に変換して出力する場合のファイル名
+if($isToSciname eq 'true'){
+	my $taxon_outfile = Input::taxon_outfile();
+	$taxobj->toScie_name(
+		$taxid_outfile,  #変換前のファイルのパス
+		$taxon_outfile   #taxid/タクソンを学名/タクソンに変換して出力するファイルパス
+	);
+}
+
 
 #Finished!
 my $fin =<<'EOS';

@@ -22,6 +22,10 @@ sub init {
 	$self->{nodes_dmp_file} //='none';
 	$self->{names_dmp_file} //='none';
 
+	#taxidと学名またはtaxonと学名を結びつける際に利用するデリミタ
+	$self->{x_sci_del_regex} = '\|';
+	$self->{x_xci_del} = "|";
+
 	#更新前taxidが入力に含まれていた場合に値が追加される連想配列
 	my %old_taxid_hash = ();
 	$self->{old_taxid_hash} = \%old_taxid_hash;
@@ -81,9 +85,9 @@ sub accession_taxid_file_getter {
 sub toScie_name {
 	my $self 	   = shift;
 	my $original_file  = shift;
-	my $ndp_delr 	   = shift;
-	my $ndp_del        = shift;
-	my $original_del   = shift;
+	#my $ndp_delr 	   = shift;
+	#my $ndp_del        = shift;
+	#my $original_del   = shift;
 	my $out_file3_name = shift;
 
 =pod
@@ -95,24 +99,57 @@ sub toScie_name {
 	----------
 	$original_file : 変換前のファイル（タクソンに対応するのがtaxid）のパス
 
-	$ndp_delr: taxidと対応するタクソンとのデリミタの正規表現
-
-	$ndp_del : taxidと対応するタクソンとのデリミタ
-
-	$original_del  : AccessionIDに対応する全てのtaxid/タクソンを結びつけるデリミタ
-
-	$out_file3_name : taxid/タクソンを学名/タクソンに変換して出力するファイルパス
+	$out_file_name : taxid/タクソンを学名/タクソンに変換して出力するファイルパス
 
 =cut
 
 	#names.dmpファイルからtaxIDと学名を連想配列で紐づける.
+	my $hash_ref = name_dmp_parser();
+
+	#taxid/タクソンのファイルから上記で紐づけた連想配列を利用し、
+	# 学名/タクソンに変換して出力する.
+	open $FH,"<",${original_file} or die "Can't open the original_file!\n";
+	open my $OFH,">",${out_file_name} or die "Can't create the ${out_file3_name}\n" ;
+	my $ndp_del = $self->{x_xci_del};
+	my $ndp_delr = $self->{x_sci_del_regex};
+	my ($accessionID,$taxid,$taxon) = ('','','');
+	my @list = (); # @list =(taxid/taxon taxid/taxon ...);
+	while(my $line=<$FH>){
+		chomp $line;
+		($accessionID,@list)=split/${original_del}/,$line;
+		print $OFH ${accessionID}.${original_del};
+		foreach $_(@list){
+			($taxid,$taxon)=split/${ndp_delr}/,$_;
+			print $OFH $hash_ref->{$taxid}.${ndp_del}.${taxon}.${original_del};
+		}
+		print $OFH "\n";	
+	}
+	close $FH;
+	close $OFH;
+
+}
+
+sub name_dmp_parser {
+	my $self = shift;
+
+=pod
+	Description
+	-----------
+	#names.dmpファイルからtaxIDと学名を連想配列で紐づける.
+
+	Return
+	------
+	\%hash : taxIDをキー、学名を値とする連想配列の参照
+
+=cut
+
 	open my $FH,"<",$self->{names_dmp_file} or die "Can't open names.dmp\n";
 	my %hash=(); #hash{taxid}=対応するタクソンの学名
 	my @node=();#(taxID,タクソンの学名,'識別子(scientific nameやtype material')
-	my $nodes_dmp_del = '\|';
+	my $names_dmp_del = '\|';
 	while(my $line=<$FH>){
 		chomp $line;
-		@node = split/${nodes_dmp_del}/,$line;
+		@node = split/${names_dmp_del}/,$line;
 		@node = map{$_ =~s/\t//g;$_}@node[0,1,3];
 		if($node[2] eq 'scientific name'){
 			$hash{$node[0]} = $node[1];
@@ -120,26 +157,7 @@ sub toScie_name {
 		}
 	}
 	close $FH;
-
-	#taxid/タクソンのファイルから上記で紐づけた連想配列を利用し、
-	# 学名/タクソンに変換して出力する.
-	open $FH,"<",${original_file} or die "Can't open the original_file!\n";
-	open my $OFH,">",${out_file3_name} or die "Can't create the ${out_file3_name}\n" ;
-	my ($accessionID,$taxid,$taxon) = ('','','');
-	my @list = (); #@list =(taxid/taxon taxid/taxon ...);
-	while(my $line=<$FH>){
-		chomp $line;
-		($accessionID,@list)=split/${original_del}/,$line;
-		print $OFH ${accessionID}.${original_del};
-		foreach $_(@list){
-			($taxid,$taxon)=split/${ndp_delr}/,$_;
-			print $OFH $hash{$taxid}.${ndp_del}.${taxon}.${original_del};
-		}
-		print $OFH "\n";	
-	}
-	close $FH;
-	close $OFH;
-
+	return \%hash;
 }
 
 sub node_dmp_parser {
@@ -159,7 +177,7 @@ sub node_dmp_parser {
 	my %hash=();#%hash =(Parent_taxid=>"Parent_taxid|Child_taxid|Taxon(genus,sfamily...)");
 	my $nodes_file_del = '\t\|\t';
 	my ($prID,$chID,$taxon)=('','',''); # 1,1,no rank
-	my ($ndp_delr,$ndp_del)=('\|',"|");
+	my $ndp_del = $self->{x_xci_del};
 	open my $FH,"<",$self->{nodes_dmp_file} or die "Can't open nodes.dmp file\n";
 	while(my $line=<$FH>){
 		chomp $line;
@@ -168,14 +186,14 @@ sub node_dmp_parser {
 	}
 	close $FH;
 
-	return ($ndp_delr,$ndp_del,\%hash);
+	return (\%hash);
 }
 
 sub hierarchy_printer {
 	my $self = shift ;
 	my $out_file1_name 	= shift // 'outA.txt' ;
 	my $isScientific_output = shift //  'false' 	;
-	my $acc_tax_ref = shift // 'false' ;#update時に使用
+	#my $acc_tax_ref = shift // 'false' ;#update時に使用
 
 =pod
 	Description
@@ -235,23 +253,11 @@ sub hierarchy_printer {
 	}
 
 
-
+=pod
 	#taxidを学名に変換したファイルを出力する(オプションを選択した場合)
 	my $out_file2_name = '';
 	if($isScientific_output eq 'true'){
 		#$out_file2_name : $isScieitific_outputが真の際に出力するファイル名
-		print "\n" ;
-		print "\n" ; 
-		print " Enter the output filename : " ;
-
-		$out_file2_name 	= <STDIN>;
-
-		chomp($out_file2_name);
-		
-		print "\n";
-		print " input OK.\n" ;
-		print "\n";
-		print " converting...";
 
 		&toScie_name(
 				$self,
@@ -262,6 +268,8 @@ sub hierarchy_printer {
 				$out_file2_name   #taxid/タクソンを学名/タクソンに変換して出力するファイルパス
 			);
 	}
+=cut
+
 	return $return_code;
 }
 
@@ -284,9 +292,12 @@ sub update_taxid_accession_file {
 
 	#merged.dmpより，更新taxidリストを作成
 	#update = (old_taxid->new_taxid);
-	my $update = BimUtils->hash_key_del_val("./data/merged.dmp",'\s\|\s');
-	print "\nttt\t$update->{12}\n";
-	print $self->{old_taxid_hash} ;
+	my $func = sub {};#chompは行わない
+	my $update = BimUtils->hash_key_del_val(
+			"./data/merged.dmp",
+			'\s\|\s',
+			$func
+		);
 
 	#更新前taxIDのハッシュのリファレンス($self->{old_taxid_hash})
 	#を$updateを利用して更新する.
@@ -294,7 +305,6 @@ sub update_taxid_accession_file {
 	foreach my $accid(keys %{$$self{old_taxid_hash}}){
 		$old_taxid = $self->{old_taxid_hash}->{$accid};
 		$new_taxid = $update->{$old_taxid};
-		print "o_${old_taxid}\tn_${new_taxid}\n";
 
 		#update %acc_tax
 		$self->{ac_tx_hash}->{$accid} = $new_taxid;
