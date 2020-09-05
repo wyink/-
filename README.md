@@ -18,10 +18,10 @@ Get all the taxonomic ranks above the target TaxId.
 
 ##### 出力
 その上位分類である種，科，目...最上位分類までを得ることができます．|の左側は分類群のTaxId、右側は分類階級です．</br>
-出力例 : ` TaxId_1	3702|species	3701|genus	980083|tribe	3700|family	3699|order	`
+出力例 : ` TaxId_1	3702|species	3701|genus	980083|tribe	3700|family ...`
 
 それぞれのデリミタ「|」の左側のTaxIdを学名に変更して出力することも可能です．</br>
-出力例 : ` TaxId_1	Arabidopsis thaliana|species	Arabidopsis|genus	Camelineae|tribe	Brassicaceae|family	Brassicales|order	`
+出力例 : ` TaxId_1	Arabidopsis thaliana|species	Arabidopsis|genus	Camelineae|tribe	Brassicaceae|family ...`
 </br>
 
 ## 使用方法
