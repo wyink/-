@@ -17,12 +17,10 @@ Get all the taxonomic ranks above the target TaxId.
 入力例 : `TaxId_1 90284`
 
 ##### 出力
-その上位分類である種，科，目...最上位分類までを得ることができます．|の左側は分類群のTaxId、右側は分類階級です．
-
+その上位分類である種，科，目...最上位分類までを得ることができます．|の左側は分類群のTaxId、右側は分類階級です．</br>
 出力例 : `TaxId_1　90284|species	90283|genus	404319|family	13798|order	...`
 
-|の左側のTaxIdを学名に変更して出力することも可能です．
-
+|の左側のTaxIdを学名に変更して出力することも可能です．</br>
 出力例 : `id_1	Pylaisiadelpha tenuirostris|species	Pylaisiadelpha|genus	Pylaisiadelphaceae|family	Hypnales|order`
 
 </br>
