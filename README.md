@@ -14,7 +14,7 @@ Get all the taxonomic ranks above the target TaxId.
 ##### 入力
 下位分類（種）のTaxIdとしてArabidopsis thalianaの90284を入力とします．仮にこのTaxIdがNCBI taxonomy database で更新されて現在は使われていなかったとしてもこのアプリケーション実行中に更新することができます．複数のTaxIdを入力ファイルに記述することで一度にまとめて取得することも可能です．
 
-入力例 : ` TaxId_1 90284`
+入力例 : ` TaxId_1 3702`
 
 ##### 出力
 その上位分類である種，科，目...最上位分類までを得ることができます．|の左側は分類群のTaxId、右側は分類階級です．</br>
