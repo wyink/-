@@ -1,23 +1,25 @@
-# GetTaxonFromTaxId
+# GetTaxnomyRanks
+Get all the taxonomic ranks above the target TaxId.
 </br>
 
 ## このアプリケーションについて
 
-すべての系統分類の各階層（種・属・科など）にはTaxIdが割り振られており，生物種の識別に広く利用されています．ここで示すTaxIDはNCBI taxonomy databaseで管理されています．このアプリケーションは下位分類（ex.種）のTaxIDからその上位分類の全て（種，属，科～）のTaxIdまたはその学名を取得することができるコンソールアプリケーションです．
+すべての系統分類の各階層（種・属・科など）にはTaxIdが割り振られており，生物種の識別に広く利用されています．ここで示すTaxIdはNCBI taxonomy databaseで管理されています．このアプリケーションは下位分類（ex.種）の**特定のTaxIdからその上位分類の全て（種，属，科～）のTaxIdまたはその学名を取得することができるコンソールアプリケーション**です．入出力例は具体例を参考にしてください．
 
 </br>
 
 ## 具体例
 
 ##### 入力
-下位分類（種）のTaxIdとしてArabidopsis thalianaの90284を入力とします．仮にこのTaxIDがNCBI taxonomy database で更新されて現在は使われていなかったとしてもこのアプリケーション実行中に更新することができる．複数のTaxIdを入力ファイルに記述することで一度にまとめて取得することも可能です．
+下位分類（種）のTaxIdとしてArabidopsis thalianaの90284を入力とします．仮にこのTaxIdがNCBI taxonomy database で更新されて現在は使われていなかったとしてもこのアプリケーション実行中に更新することができます．複数のTaxIdを入力ファイルに記述することで一度にまとめて取得することも可能です．
+入力例 : `TaxId_1 90284`
 
 ##### 出力
-その上位分類である種，科，目...最上位分類までを得ることができます．左側はそれぞれの分類群のTaxIdです．
-`TaxID_1　90284|species	90283|genus	404319|family	13798|order	...`
+その上位分類である種，科，目...最上位分類までを得ることができます．|の左側は分類群のTaxId、右側は分類階級です．
+出力例 : `TaxId_1　90284|species	90283|genus	404319|family	13798|order	...`
 
-左側のTaxIdを学名に変更して出力することも可能です．
-`id_1	Pylaisiadelpha tenuirostris|species	Pylaisiadelpha|genus	Pylaisiadelphaceae|family	Hypnales|order`
+|の左側のTaxIdを学名に変更して出力することも可能です．
+出力例 : `id_1	Pylaisiadelpha tenuirostris|species	Pylaisiadelpha|genus	Pylaisiadelphaceae|family	Hypnales|order`
 
 </br>
 
@@ -96,7 +98,7 @@ nodes.dmpおよびnames.dmpはncbiのFTPに置かれているtaxdmp.zipを解凍
 ここまででoutput1.txtには`id_1	90284|species	90283|genus	404319|family...	131567|no rank`と正しく出力されているのが確認できます．
 </br>
 
-#### 6. 手順4で出力されている「TaxID|分類階級」を「学名|分類階級」に変換
+#### 6. 手順4で出力されている「TaxId|分類階級」を「学名|分類階級」に変換
 ```
 //...省略
 Enter the output filename : output1.txt
