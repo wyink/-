@@ -93,12 +93,13 @@ nodes.dmpおよびnames.dmpはncbiのFTPに置かれているtaxdmp.zipを解凍
 </br>
 
 #### 5. 結果の確認
-ここまででoutput.txtには`id_1	90284|species	90283|genus	404319|family...	131567|no rank`と正しく出力されているのが確認できます．
+ここまででoutput1.txtには`id_1	90284|species	90283|genus	404319|family...	131567|no rank`と正しく出力されているのが確認できます．
 </br>
 
 #### 6. 手順4で出力されている「TaxID|分類階級」を「学名|分類階級」に変換
 ```
-Enter the output filename :  out1.txt
+//...省略
+Enter the output filename : output1.txt
 
  input OK.
 
