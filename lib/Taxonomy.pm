@@ -8,29 +8,51 @@ sub new {
 	my $class = shift ;
 	my $self = { @_ } ;
 	bless $self,$class;
-	
-	$self->init();
-    
+	$self->init();  
 	return $self;
 }
 
 sub init {
 	my $self = shift;
 
+=pod
+	Description
+	-----------
+	メンバ変数を初期化する
+
+	Member
+	------
+	accession_taxid_file : 
+		入力ファイルのパス　(カラムはuniqueIDとTaxonomyID)
+
+	delimiter_of_accession_and_taxid : 
+		上記のファイルのカラム間で使用しているデリミタ
+
+	x_sci_del : 
+		taxidと学名またはtaxonと学名を結びつける際に利用するデリミタ
+
+	x_sci_del_regex : 
+		x_sci_delの正規表現用のパターン
+
+	old_taxid_hash : 
+		更新前taxidが入力に含まれていた場合に値が追加される連想配列
+	
+	ac_tx_hash : 
+		入力ファイルに含まれるAccessionIDとtaxidを結びつけた連想配列
+	
+=cut
+
 	$self->{accession_taxid_file} //= 'none';
 	$self->{delimiter_of_accession_and_taxid} //='none';
 	$self->{nodes_dmp_file} //='none';
 	$self->{names_dmp_file} //='none';
-
-	#taxidと学名またはtaxonと学名を結びつける際に利用するデリミタ
 	$self->{x_sci_del_regex} = '\|';
-	$self->{x_xci_del} = "|";
+	$self->{x_sci_del} = "|";
 
-	#更新前taxidが入力に含まれていた場合に値が追加される連想配列
+	
 	my %old_taxid_hash = ();
 	$self->{old_taxid_hash} = \%old_taxid_hash;
 
-	#入力ファイルに含まれるAccessionIDとtaxidを結びつけた連想配列
 	$self->{ac_tx_hash} = BimUtils->hash_key_del_val(
 		$self->{accession_taxid_file},
 		$self->{delimiter_of_accession_and_taxid}
@@ -60,7 +82,7 @@ sub accession_taxid_file_setter {
 	Parameters
 	----------
 	$new_accession_taxid_file: 
-	accession_taxid_fileの変更後の値
+		accession_taxid_fileの変更後の値
 
 =cut
 	$self->{accession_taxid_file} = $new_accession_taxid_file ;
@@ -76,7 +98,7 @@ sub accession_taxid_file_getter {
 	Returns
 	-------
 	$self->accession_taxid_file:
-	メンバ変数の$accession_taxid_fileの値を返却する
+		メンバ変数の$accession_taxid_fileの値を返却する
 	
 =cut
 	return $self->{accession_taxid_file};
@@ -85,10 +107,7 @@ sub accession_taxid_file_getter {
 sub toScie_name {
 	my $self 	   = shift;
 	my $original_file  = shift;
-	#my $ndp_delr 	   = shift;
-	#my $ndp_del        = shift;
-	#my $original_del   = shift;
-	my $out_file3_name = shift;
+	my $out_file_name = shift;
 
 =pod
 	Description
@@ -97,32 +116,35 @@ sub toScie_name {
 
 	Parameters
 	----------
-	$original_file : 変換前のファイル（タクソンに対応するのがtaxid）のパス
+	$original_file : 
+		変換前のファイル（タクソンに対応するのがtaxid）のパス
 
-	$out_file_name : taxid/タクソンを学名/タクソンに変換して出力するファイルパス
+	$out_file_name : 
+		taxid/タクソンを学名/タクソンに変換して出力するファイルパス
 
 =cut
 
 	#names.dmpファイルからtaxIDと学名を連想配列で紐づける.
-	my $hash_ref = name_dmp_parser();
+	my $hash_ref = name_dmp_parser($self);
 
 	#taxid/タクソンのファイルから上記で紐づけた連想配列を利用し、
 	# 学名/タクソンに変換して出力する.
-	open $FH,"<",${original_file} or die "Can't open the original_file!\n";
-	open my $OFH,">",${out_file_name} or die "Can't create the ${out_file3_name}\n" ;
-	my $ndp_del = $self->{x_xci_del};
-	my $ndp_delr = $self->{x_sci_del_regex};
-	my ($accessionID,$taxid,$taxon) = ('','','');
-	my @list = (); # @list =(taxid/taxon taxid/taxon ...);
+	open my $FH,"<",${original_file} or die "Can't open the original_file!\n";
+	open my $OFH,">",${out_file_name} or die "Can't create the ${out_file_name}\n" ;
+	my $del1 = $self->{x_sci_del};
+	my $delr = $self->{x_sci_del_regex};
+	my ($accessionID,$taxid,$taxon,$tmp) = ('','','','');
+	my $del2 = $self->{delimiter_of_accession_and_taxid};
+	my @list = (); # (taxid/taxon taxid/taxon ...);
 	while(my $line=<$FH>){
 		chomp $line;
-		($accessionID,@list)=split/${original_del}/,$line;
-		print $OFH ${accessionID}.${original_del};
+		($accessionID,@list)=split/$del2/,$line;
+		$tmp = '' ;		
 		foreach $_(@list){
-			($taxid,$taxon)=split/${ndp_delr}/,$_;
-			print $OFH $hash_ref->{$taxid}.${ndp_del}.${taxon}.${original_del};
+			($taxid,$taxon)=split/$delr/,$_;
+			$tmp .= $hash_ref->{$taxid}.${del1}.${taxon}.${del2};
 		}
-		print $OFH "\n";	
+		print $OFH ${accessionID}.${del2}.$tmp."\n";
 	}
 	close $FH;
 	close $OFH;
@@ -135,11 +157,12 @@ sub name_dmp_parser {
 =pod
 	Description
 	-----------
-	#names.dmpファイルからtaxIDと学名を連想配列で紐づける.
+	names.dmpファイルからtaxIDと学名を連想配列で紐づける.
 
 	Return
 	------
-	\%hash : taxIDをキー、学名を値とする連想配列の参照
+	\%hash : 
+		taxIDをキー、学名を値とする連想配列の参照
 
 =cut
 
@@ -157,6 +180,7 @@ sub name_dmp_parser {
 		}
 	}
 	close $FH;
+
 	return \%hash;
 }
 
@@ -170,30 +194,29 @@ sub node_dmp_parser {
 
 	Returns
 	------
-	$hash_ref : keyは系統の親のtaxid,valueは文字列（"親taxid|子taxid|タクソン"）
+	$hash_ref : 
+		keyは系統の親のtaxid,valueは文字列（"親taxid|子taxid|タクソン"）
 
 =cut
 
 	my %hash=();#%hash =(Parent_taxid=>"Parent_taxid|Child_taxid|Taxon(genus,sfamily...)");
 	my $nodes_file_del = '\t\|\t';
 	my ($prID,$chID,$taxon)=('','',''); # 1,1,no rank
-	my $ndp_del = $self->{x_xci_del};
+	my $del1 = $self->{x_sci_del};
 	open my $FH,"<",$self->{nodes_dmp_file} or die "Can't open nodes.dmp file\n";
 	while(my $line=<$FH>){
 		chomp $line;
 		($prID,$chID,$taxon,@_)=split/${nodes_file_del}/,$line;
-		$hash{$prID}= join($ndp_del,($prID,$chID,$taxon));
+		$hash{$prID}= join($del1,($prID,$chID,$taxon));
 	}
 	close $FH;
 
-	return (\%hash);
+	return \%hash;
 }
 
 sub hierarchy_printer {
 	my $self = shift ;
 	my $out_file1_name 	= shift // 'outA.txt' ;
-	my $isScientific_output = shift //  'false' 	;
-	#my $acc_tax_ref = shift // 'false' ;#update時に使用
 
 =pod
 	Description
@@ -203,41 +226,41 @@ sub hierarchy_printer {
 
 	Parameters
 	-----------
-	$out_file1_name : Descriptionで述べた内容を出力する.
-
-	$isScientific_output :  デフォルトではtaxIDと対応するタクソンの組み合わせ
-				で出力するがこのtaxIDを学名に変換して出力するかどうか.
-				trueで出力、falseで出力しない.
+	$out_file1_name : 
+		Descriptionで述べた内容を出力するファイル名
 	
+	Return
+	------
+	$return_code :
+		未更新のtaxidが存在する場合は"true"、存在しない
+		場合は"false"を返却する.
+		
 =cut
 
-	#my $old_taxid_hash_ref = $self->{old_taxid_hash} ;# taxidが更新されていないAcccessionIDを管理.			　
-
 	#nodes.dmpの解析
-	my ($ndp_delr,$ndp_del,$node_parsed_href) = &node_dmp_parser($self);
+	my $node_parsed_href = &node_dmp_parser($self);
 	open my $OFH,">",${out_file1_name} or die "Can't open ${out_file1_name}\n" ;
 
-	my $output_del = "\t" ;#outfile1_name(出力ファイル)で使用するデリミタ
 	foreach my $accessionID (keys %{$$self{ac_tx_hash}}){
 		my $taxID = $self->{ac_tx_hash}->{$accessionID} ;
-		print "${taxID}\n";
 
 		#子の最下層までループして出力する
-		my ($prID,$chID,$taxon)=('','','');
+		my ($prID,$chID,$taxon,$out)=('','','','');
 		my @outList = () ;
-		my $out = '';
+		my ($delr,$del1) = ($self->{x_sci_del_regex},$self->{x_sci_del});
+		my $del2 = $self->{delimiter_of_accession_and_taxid} ;
 		while(1){
 			if(exists $node_parsed_href->{$taxID}){
-				($prID,$chID,$taxon)=split/${ndp_delr}/,$node_parsed_href->{$taxID};
-				push @outList,join($ndp_del,($prID,$taxon)) ;#"$prID|$taxon"
+				($prID,$chID,$taxon)=split/$delr/,$node_parsed_href->{$taxID};
+				push @outList,join($del1,($prID,$taxon)) ;
 			}else{
 				$self->{old_taxid_hash}->{$accessionID} = $taxID;
 				last;
 			}
 			$taxID = $chID;
 			if($chID == 1){
-				$out = join($output_del,@outList) ;
-				print $OFH "${accessionID}\t${out}\n";
+				$out = join($del2,@outList) ;
+				print $OFH ${accessionID}.${del2}.${out}."\n";
 				@outList = ();
 				last;
 			}
@@ -245,48 +268,26 @@ sub hierarchy_printer {
 	}
 	close $OFH;
 
-	#更新されていないtaxidが存在する場合はリストで出力する.
+	#未更新のtaxidが存在する場合は$self->{old_taid_hash}に登録
 	my $return_code = 'false';
 	my $temp = $self->{old_taxid_hash};
 	if(scalar(keys %$temp)){
 		$return_code = 'true';
 	}
 
-
-=pod
-	#taxidを学名に変換したファイルを出力する(オプションを選択した場合)
-	my $out_file2_name = '';
-	if($isScientific_output eq 'true'){
-		#$out_file2_name : $isScieitific_outputが真の際に出力するファイル名
-
-		&toScie_name(
-				$self,
-				$out_file1_name,  #変換前のファイル（タクソンに対応するのがtaxid）のパス
-				$ndp_delr,		  #taxidと対応するタクソンとのデリミタの正規表現
-				$ndp_del,		  #taxidと対応するタクソンとのデリミタ
-				$output_del,	  #AccessionIDに対応する全てのtaxid/タクソンを結びつけるデリミタ
-				$out_file2_name   #taxid/タクソンを学名/タクソンに変換して出力するファイルパス
-			);
-	}
-=cut
-
 	return $return_code;
 }
 
 sub update_taxid_accession_file {
 	my $self	= shift;
-	# my $out_file = shift; #出力ファイル名
-	# my $isToSciname = shift ; #taxidをタクソンに変換するかどうかの確認
 
 =pod
 	Description
 	-----------
-	古いtaxidを新しいtaxidで置き換えてtaxid_accession_fileを
-	再出力し,これをTaxonomyオブジェクトのメンバ変数にsetする.
-
-	Parameters
-	----------
-	$acc_tax_ref : hash_ref = {'AccessionID'=>'taxonomyID'}
+	$self->{old_taxid_hash} に含まれている未更新のtaxonomyID
+	からmerged.dmpを利用して更新後のtaxonomyIDを取得する。更新
+	前のtaxidを値として保持するメンバ変数($self->{ac_tx_hash})
+	の値を更新後のtaxonomyID に変更する.
 
 =cut
 
@@ -305,8 +306,6 @@ sub update_taxid_accession_file {
 	foreach my $accid(keys %{$$self{old_taxid_hash}}){
 		$old_taxid = $self->{old_taxid_hash}->{$accid};
 		$new_taxid = $update->{$old_taxid};
-
-		#update %acc_tax
 		$self->{ac_tx_hash}->{$accid} = $new_taxid;
 	}
 

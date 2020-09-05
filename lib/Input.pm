@@ -104,8 +104,8 @@ sub input_file {
 =cut
 
 my $text1 = <<'EOS';
- =======================================================
- input your file that describes AccessionID & TaxonomyID
+ ==========================================================
+ input your file that describes your uniqueID & TaxonomyID
 
    Example : 
    --------------------
@@ -125,7 +125,6 @@ my $text2 = <<'EOS';
 
   1.  Tab
   2.  , 
-  3.  space
 
  Select the number : 
 EOS
@@ -144,7 +143,7 @@ EOS
         }else{
             print "\n";
             print " Error\n";
-            print " Verify that correct path to the file are given.\n";
+            print " Verify that correct path to the file is given.\n";
         }
     }
 
@@ -161,10 +160,6 @@ EOS
     	}elsif($d == 2){
     		$flag = 'true';
     		$delimiter = "," ;
-
-    	}elsif($d == 3){
-    		$flag = 'true';
-    		$delimiter = " " ;
 
     	}
     }while($flag eq 'false');
@@ -193,6 +188,13 @@ my $text1 =<<'EOS';
  Enter the output filename :  
 EOS
 
+my $text2 =<<'EOS';
+
+ input OK.
+
+EOS
+
+
     chomp($text1) ;
     print $text1;
     my $taxid_outfile = <STDIN>;
@@ -204,9 +206,17 @@ EOS
             #re-loop
     	}else{
     		$flag = 'true' ;
+            print $text2 ;
     	}
 
     }while($flag eq 'false');
+
+    #flush
+    $|=1;
+    print "\n";
+    print "\n";
+    print " running..." ;
+    $|=0;
 
     return $taxid_outfile;
 
@@ -226,9 +236,11 @@ sub isToSciname {
 =cut
 
 my $text1 =<<'EOS';
+
  ==================================================================
 
- Do you also want to convert TaxonomyID to Scientific name? [y/n] :  
+ Each TaxonomyID can be converted to Scientific name.
+ Do you want to do that? (create new file) [y/n] :  
 EOS
 
     chomp($text1);
@@ -251,40 +263,47 @@ EOS
             #loop
     	}
     }
-
-    #flush
-    $|=1;
-    print "\n";
-    print " running..." ;
-    $|=0;
     
     return $bool;
 }
 
 sub ask_update {
 
-my $text1 =<<'EOS';
+my $text =<<'EOS';
 
+
+ ========================================
  Your input file includes old taxonomyID.
+
  Do you want to update them and run again?[y/n] : 
 EOS
 
+    chomp $text ;
     my $flag='false';
+    my $ret_ans = '';
     while($flag eq 'false'){
-        print $text1;
+        print $text;
         my $answer = <STDIN>;
         chomp $answer;
 
         if($answer eq 'y'){
             $flag='true';
-            return 'true';
+            $ret_ans = 'true';
         }elsif($answer eq 'n'){
             $flag='true';
-            return 'false';
+            $ret_ans = 'false';
         }else{
             #loop
         }
     }
+
+    #flush
+    $|=1;
+    print "\n";
+    print " running..." ;
+    $|=0;
+
+    return $ret_ans;
 
 }
 
@@ -330,6 +349,13 @@ EOS
             #loop
         }
     }
+
+    #flush
+    $|=1;
+    print "\n";
+    print " running..." ;
+    $|=0;
+
     return $out_file_name;
 }
 
