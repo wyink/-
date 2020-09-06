@@ -29,7 +29,7 @@ Get all the taxonomic ranks above the target TaxId.
 **Perl 5.x がインストールされている必要があります**
 
 1. `launch.bat`をダブルクリックして実行します．(Windows)</br>
-   ターミナルから`$ perl/main.pl`でも実行することができます. 
+   ターミナルから`$ script/main.pl`でも実行することができます. 
 2. 基本的にはプロンプトに従って入力していきます．
 
 </br>
