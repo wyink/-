@@ -12,7 +12,7 @@ Get all the taxonomic ranks above the target TaxId.
 ## 具体例
 
 ##### 入力
-下位分類（種）のTaxIdとしてArabidopsis thalianaの90284を入力とします．仮にこのTaxIdがNCBI taxonomy database で更新されて現在は使われていなかったとしてもこのアプリケーション実行中に更新することができます．複数のTaxIdを入力ファイルに記述することで一度にまとめて取得することも可能です．
+下位分類（種）のTaxIdとしてArabidopsis thalianaの3702を入力とします．仮にこのTaxIdがNCBI taxonomy database で更新されて現在は使われていなかったとしてもこのアプリケーション実行中に更新することができます．複数のTaxIdを入力ファイルに記述することで一度にまとめて取得することも可能です．
 
 入力例 : ` TaxId_1 3702`
 
@@ -26,8 +26,10 @@ Get all the taxonomic ranks above the target TaxId.
 
 ## 使用方法
 
-このアプリケーションはWindowsを対象としています．
-1. `launch.bat`をダブルクリックして実行します．
+**Perl 5.x がインストールされている必要があります**
+
+1. `launch.bat`をダブルクリックして実行します．(Windows)</br>
+   ターミナルから`$ perl/main.pl`でも実行することができます. 
 2. 基本的にはプロンプトに従って入力していきます．
 
 </br>
